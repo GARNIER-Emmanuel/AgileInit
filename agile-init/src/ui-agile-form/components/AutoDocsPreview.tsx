@@ -13,135 +13,101 @@ interface AutoDocsPreviewProps {
 }
 
 export const AutoDocsPreview: React.FC<AutoDocsPreviewProps> = ({ docs }) => {
-  const [activeTab, setActiveTab] = useState<keyof typeof docs | 'antigravity'>('readme');
-  const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
+  const [activeFile, setActiveFile] = useState<keyof typeof docs>('readme');
+  const [copied, setCopied] = useState(false);
 
-  const tabs: { key: keyof typeof docs | 'antigravity'; label: string }[] = [
-    { key: 'readme', label: 'README' },
-    { key: 'productVision', label: 'Vision' },
-    { key: 'userStories', label: 'US' },
-    { key: 'backlog', label: 'Backlog' },
-    { key: 'architecture', label: 'Arch' },
-    { key: 'antigravity', label: '⚡ ANTIGRAVITY' },
+  const fileMappings: { key: keyof typeof docs; filename: string }[] = [
+    { key: 'readme', filename: 'README.md' },
+    { key: 'productVision', filename: 'PRODUCT_VISION.md' },
+    { key: 'userStories', filename: 'USER_STORIES.md' },
+    { key: 'backlog', filename: 'BACKLOG.md' },
+    { key: 'architecture', filename: 'ARCHITECTURE.md' },
+    { key: 'antigravityPlan', filename: 'ANTIGRAVITY_PLAN.md' },
+    { key: 'geminiPrompts', filename: 'GEMINI_PROMPTS.md' },
   ];
 
-  const handleCopy = (key: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied({ ...copied, [key]: true });
-    setTimeout(() => setCopied({ ...copied, [key]: false }), 2000);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(docs[activeFile]);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleCopyAll = () => {
-    const all = Object.values(docs).join('\n\n---\n\n');
-    handleCopy('all', all);
-  };
-
-  // Helper to extract phases from geminiPrompts (simple regex/split for demo)
-  const extractPrompts = (fullText: string) => {
-    const phases = fullText.split('## Prompt').filter(p => p.trim() !== '');
-    return phases.map(p => {
-      const titleMatch = p.match(/^(.*)\n/);
-      const title = titleMatch ? `Prompt ${titleMatch[1]}` : 'Prompt Segment';
-      return { title, content: `## Prompt${p}` };
-    });
+    const all = fileMappings.map(f => `### ${f.filename}\n\n${docs[f.key]}`).join('\n\n---\n\n');
+    navigator.clipboard.writeText(all);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="premium-card glass" style={{ marginTop: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #2A2A2A', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                background: activeTab === tab.key ? (tab.key === 'antigravity' ? 'rgba(173, 198, 255, 0.2)' : 'var(--surface-container)') : 'transparent',
-                border: 'none',
-                color: activeTab === tab.key ? '#ADC6FF' : 'rgba(255,255,255,0.4)',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                whiteSpace: 'nowrap',
-                fontWeight: activeTab === tab.key ? 700 : 400
-              }}
-            >
-              {tab.label}
-            </button>
+    <div className="autodocs-preview-v2" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', overflow: 'hidden' }}>
+      
+      {/* File Selection Menu */}
+      <div className="file-selector" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '0.8rem' }}>
+        <label style={{ fontSize: '0.65rem', letterSpacing: '0.15em', opacity: 0.5, marginBottom: '0.5rem', display: 'block' }}>SÉLECTIONNER UN LIVRABLE</label>
+        <select 
+          value={activeFile} 
+          onChange={(e) => setActiveFile(e.target.value as any)}
+          style={{ 
+            width: '100%', 
+            background: 'var(--surface-low)', 
+            color: 'white', 
+            border: '1px solid #333', 
+            borderRadius: '4px', 
+            padding: '0.6rem',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            outline: 'none'
+          }}
+        >
+          {fileMappings.map(f => (
+            <option key={f.key} value={f.key}>{f.filename}</option>
           ))}
-        </div>
-        <button onClick={handleCopyAll} className="btn-secondary" style={{ fontSize: '0.7rem', opacity: 0.8, background: copied['all'] ? '#28a745' : 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid #2A2A2A', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer' }}>
-          {copied['all'] ? 'COPIÉ' : 'COPY ALL'}
+        </select>
+      </div>
+
+      {/* Content Toolbar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <button 
+          onClick={handleCopy} 
+          className="btn-primary" 
+          style={{ flex: 1, fontSize: '0.75rem', padding: '0.7rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+        >
+          {copied ? '✅ COPIÉ !' : `📋 COPIER ${activeFile === 'readme' ? 'README' : 'LE FICHIER'}`}
+        </button>
+        <button 
+          onClick={handleCopyAll} 
+          className="btn-secondary" 
+          style={{ width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          title="Copier tout le pack"
+        >
+          📦
         </button>
       </div>
 
-      {activeTab === 'antigravity' ? (
-        <div className="antigravity-view">
-          <header style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(255, 181, 149, 0.05)', borderRadius: '8px', borderLeft: '4px solid #FFB595' }}>
-            <h4 style={{ color: '#FFB595', marginBottom: '0.5rem', fontSize: '0.9rem' }}>MODE EXPERT : ANTIGRAVITY HELPER</h4>
-            <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>Utilisez ces prompts séquentiels pour générer tout le code via Gemini 1.5 Pro ou 2.0.</p>
-          </header>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-            {/* Plan Display */}
-            <div>
-              <h5 style={{ fontSize: '0.75rem', marginBottom: '1rem', opacity: 0.8 }}>📋 PLAN DE GÉNÉRATION</h5>
-              <pre style={{ background: 'var(--surface-low)', padding: '1rem', borderRadius: '8px', color: '#ADC6FF', fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
-                {docs.antigravityPlan}
-              </pre>
-            </div>
-
-            {/* Prompts Action Zone */}
-            <div>
-              <h5 style={{ fontSize: '0.75rem', marginBottom: '1rem', opacity: 0.8 }}>⚡ PROMPTS PAR PHASE (COPIE DIRECTE)</h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                {extractPrompts(docs.geminiPrompts).map((p, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => handleCopy(`p${i}`, p.content)}
-                    className="btn-primary" 
-                    style={{ 
-                      textAlign: 'left', 
-                      fontSize: '0.75rem', 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      background: copied[`p${i}`] ? '#28a745' : 'linear-gradient(135deg, #1C1B1B, #201F1F)',
-                      border: '1px solid var(--outline-variant)',
-                      color: 'white'
-                    }}
-                  >
-                    <span>{p.title}</span>
-                    <span style={{ opacity: 0.5 }}>{copied[`p${i}`] ? 'COPIÉ !' : 'CLIQUER POUR COPIER'}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+      {/* Markdown Preview Area */}
+      <div style={{ 
+        flex: 1, 
+        background: '#0D0D0D', 
+        border: '1px solid #2A2A2A', 
+        borderRadius: '8px', 
+        padding: '1.5rem', 
+        overflowY: 'auto',
+        fontFamily: 'monospace',
+        fontSize: '0.85rem',
+        lineHeight: 1.6,
+        color: '#E5E2E1'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #2A2A2A', paddingBottom: '0.8rem', marginBottom: '1.5rem' }}>
+           <span style={{ fontSize: '0.7rem', color: '#ADC6FF', fontWeight: 700 }}>{fileMappings.find(f => f.key === activeFile)?.filename}</span>
+           <span style={{ fontSize: '0.6rem', opacity: 0.4 }}>Markdown Raw</span>
         </div>
-      ) : (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-            <button key={activeTab} onClick={() => handleCopy(activeTab, docs[activeTab as keyof typeof docs])} className="btn-primary" style={{ fontSize: '0.7rem', padding: '0.4rem 1rem' }}>
-              {copied[activeTab] ? 'COPIÉ' : `COPIER ${activeTab.toUpperCase()}`}
-            </button>
-          </div>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+          {docs[activeFile]}
+        </pre>
+      </div>
 
-          <pre style={{ 
-            background: 'var(--surface-low)', 
-            padding: '1.5rem', 
-            borderRadius: '8px', 
-            color: '#E5E2E1', 
-            fontSize: '0.85rem', 
-            overflowX: 'auto',
-            fontFamily: 'monospace',
-            lineHeight: 1.5,
-            maxHeight: '500px'
-          }}>
-            {docs[activeTab as keyof typeof docs]}
-          </pre>
-        </>
-      )}
     </div>
   );
 };

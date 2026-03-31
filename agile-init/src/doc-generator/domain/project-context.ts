@@ -9,4 +9,6 @@ export interface ProjectContext {
     db: string;
   };
   constraints?: string[];
+  userStories?: any[];
+  personas?: any[];
 }
