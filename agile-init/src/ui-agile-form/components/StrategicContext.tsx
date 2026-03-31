@@ -6,9 +6,10 @@ interface StrategicContextProps {
   onChange: (data: ProjectContext) => void;
   personas: any[];
   onAddPersona: (data: { name: string; role: string; description: string }) => void;
+  onAddUS: (data: { role: string; action: string; benefit: string; personaId: string }) => void;
 }
 
-export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, onChange, personas, onAddPersona }) => {
+export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, onChange, personas, onAddPersona, onAddUS }) => {
   const [expanded, setExpanded] = useState<string | null>('projet');
 
   const toggle = (section: string) => {
@@ -68,6 +69,14 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
     fontWeight: 600,
     fontSize: '0.8rem',
     color: '#ADC6FF'
+  };
+
+  const [newUS, setNewUS] = useState({ personaId: '', role: '', action: '', benefit: '' });
+  const handleUSSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUS.action || !newUS.personaId) return;
+    onAddUS(newUS);
+    setNewUS({ ...newUS, action: '', benefit: '' }); // keep persona
   };
 
   return (
@@ -200,6 +209,62 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
               </button>
             </form>
           </div>
+        )}
+      </div>
+
+      {/* SECTION: USER STORY */}
+      <div className="accordion-item">
+        <header style={sectionHeaderStyle} onClick={() => toggle('us')}>
+          <span>USER STORY</span>
+          <span>{expanded === 'us' ? '−' : '+'}</span>
+        </header>
+        {expanded === 'us' && (
+          <form onSubmit={handleUSSubmit} style={{ padding: '0.5rem 1rem 1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            <div>
+              <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>EN TANT QUE (PERSONA)</label>
+              <select 
+                value={newUS.personaId} 
+                onChange={(e) => {
+                  const p = personas.find(pers => pers.id === e.target.value);
+                  setNewUS({ ...newUS, personaId: e.target.value, role: p ? p.role : '' });
+                }} 
+                style={{ ...inputStyle, background: 'rgba(255,255,255,0.1)', cursor: 'pointer' } as any}
+                required
+              >
+                <option value="" style={{ background: '#1c1b1b', color: 'white' }}>-- Choisir un persona --</option>
+                {personas.map(p => (
+                  <option key={p.id} value={p.id} style={{ background: '#1c1b1b', color: 'white' }}>
+                    {p.name} ({p.role})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>JE VEUX (ACTION)</label>
+              <input 
+                type="text" 
+                placeholder="Ex: pouvoir me connecter..." 
+                value={newUS.action} 
+                onChange={(e) => setNewUS({ ...newUS, action: e.target.value })} 
+                style={inputStyle} 
+                required
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>AFIN DE (BÉNÉFICE)</label>
+              <input 
+                type="text" 
+                placeholder="Ex: accéder à mon profil..." 
+                value={newUS.benefit} 
+                onChange={(e) => setNewUS({ ...newUS, benefit: e.target.value })} 
+                style={inputStyle} 
+                required
+              />
+            </div>
+            <button type="submit" style={{ background: '#FFB595', color: 'black', border: 'none', padding: '0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.5rem' }}>
+              AJOUTER AU BACKLOG
+            </button>
+          </form>
         )}
       </div>
 

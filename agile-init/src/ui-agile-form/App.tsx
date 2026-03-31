@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { StrategicContext } from './components/StrategicContext';
-import { UserStoryForm } from './components/UserStoryForm';
 import { UserStoryList } from './components/UserStoryList';
 import { AutoDocsPreview } from './components/AutoDocsPreview';
 import { Suggestions } from './components/Suggestions';
@@ -150,6 +149,7 @@ function App() {
             onChange={setStrategicCtx} 
             personas={project.personas}
             onAddPersona={handleAddPersona}
+            onAddUS={handleAddUS}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', marginTop: '1rem', opacity: 0.4 }}>
@@ -165,10 +165,9 @@ function App() {
       <main className="workspace unified-center" style={{ overflowY: 'auto', padding: '2rem', background: 'rgba(0,0,0,0.15)' }}>
         <h3 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: 600 }}>Spécifications & Backlog</h3>
         
-        <UserStoryForm personas={project.personas} onAdd={handleAddUS} />
         <Suggestions sugs={suggestions} onAccept={(sug) => handleAddUS(sug as any)} onReject={(idx) => setSuggestions(prev => prev.filter((_, i) => i !== idx))} />
         
-        <div style={{ marginTop: '3rem' }}>
+        <div style={{ marginTop: '1rem' }}>
           <UserStoryList stories={project.userStories} personas={project.personas} />
         </div>
       </main>
