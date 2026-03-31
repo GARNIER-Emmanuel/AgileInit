@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { StrategicContext } from './components/StrategicContext';
-import { PersonaForm } from './components/PersonaForm';
 import { UserStoryForm } from './components/UserStoryForm';
 import { UserStoryList } from './components/UserStoryList';
 import { AutoDocsPreview } from './components/AutoDocsPreview';
@@ -53,13 +52,6 @@ function App() {
     return () => clearTimeout(timeout);
   }, [strategicCtx, project?.userStories, project?.personas]);
 
-  const downloadAll = async () => {
-    const response = await fetch('/api/export', { method: 'POST' });
-    if (response.ok) {
-      alert("Projet synchronisé avec le backend !");
-    }
-  };
-
   useEffect(() => {
     if (project) {
       setStrategicCtx(prev => ({
@@ -94,6 +86,8 @@ function App() {
     setProject({ ...store.getProject()! });
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   if (!project) {
     return (
       <div className="onboarding-page" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -105,54 +99,70 @@ function App() {
   return (
     <div className="dashboard-layout v2-fusion" style={{ 
       display: 'grid', 
-      gridTemplateColumns: 'minmax(250px, 1fr) minmax(400px, 2fr) minmax(350px, 1.5fr)',
+      gridTemplateColumns: `${isSidebarOpen ? '320px' : '64px'} 1fr minmax(350px, 1.2fr)`,
       height: '100vh',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      transition: 'grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     }}>
       
       {/* Column 1: Strategic Context & Personas */}
-      <aside className="sidebar unified-left" style={{ borderRight: '1px solid #2A2A2A', overflowY: 'auto', padding: '1rem' }}>
-        <header style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1rem', color: '#ADC6FF' }}>AGILEINIT <span style={{ opacity: 0.5 }}>FUSION</span></h2>
-        </header>
-
-        <StrategicContext formData={strategicCtx} onChange={setStrategicCtx} />
-
-        <div style={{ marginTop: '2rem', borderTop: '1px solid #2A2A2A', paddingTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '0.7rem', letterSpacing: '0.1em', opacity: 0.8, marginBottom: '1rem' }}>PERSONAS</h3>
-          <div className="persona-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.5rem' }}>
-            {project.personas.map(p => (
-              <span key={p.id} style={{ fontSize: '0.65rem', background: 'rgba(173, 198, 255, 0.1)', border: '1px solid var(--outline-variant)', color: '#ADC6FF', padding: '0.3rem 0.6rem', borderRadius: '4px' }}>
-                {p.name}
-              </span>
-            ))}
-          </div>
-          <PersonaForm onAdd={handleAddPersona} />
-        </div>
-
-        <div style={{ marginTop: 'auto', borderTop: '1px solid #2A2A2A', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+      <aside className="sidebar unified-left" style={{ 
+        borderRight: '1px solid #2A2A2A', 
+        overflowY: isSidebarOpen ? 'auto' : 'hidden', 
+        padding: isSidebarOpen ? '1rem' : '0.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'padding 0.3s'
+      }}>
+        <header style={{ 
+          marginBottom: isSidebarOpen ? '2rem' : '1rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: isSidebarOpen ? 'space-between' : 'center' 
+        }}>
+          {isSidebarOpen && (
+            <h2 style={{ fontSize: '0.9rem', color: '#ADC6FF', margin: 0 }}>AGILEINIT <span style={{ opacity: 0.5 }}>FUSION</span></h2>
+          )}
           <button 
-            onClick={downloadAll} 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             style={{ 
-              background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid #2A2A2A', 
+              background: 'transparent', 
+              border: 'none', 
               color: 'white', 
-              padding: '0.6rem', 
-              borderRadius: '6px', 
-              fontSize: '0.7rem', 
-              cursor: 'pointer',
+              cursor: 'pointer', 
+              padding: '8px',
+              borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '0.5rem'
-            }}>
-            🚀 EXPORT API PROJET
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            {isSidebarOpen ? '✕' : '☰'}
           </button>
-        </div>
+        </header>
+
+        {isSidebarOpen ? (
+          <StrategicContext 
+            formData={strategicCtx} 
+            onChange={setStrategicCtx} 
+            personas={project.personas}
+            onAddPersona={handleAddPersona}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', marginTop: '1rem', opacity: 0.4 }}>
+            <div title="Projet">📁</div>
+            <div title="Stack">⚡</div>
+            <div title="Objectifs">🎯</div>
+            <div title="Personas">👥</div>
+          </div>
+        )}
       </aside>
 
       {/* Column 2: User Stories Workshop */}
-      <main className="workspace unified-center" style={{ overflowY: 'auto', padding: '2rem', background: 'rgba(0,0,0,0.2)' }}>
+      <main className="workspace unified-center" style={{ overflowY: 'auto', padding: '2rem', background: 'rgba(0,0,0,0.15)' }}>
         <h3 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: 600 }}>Spécifications & Backlog</h3>
         
         <UserStoryForm personas={project.personas} onAdd={handleAddUS} />
