@@ -86,6 +86,7 @@ function App() {
   };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isBacklogOpen, setIsBacklogOpen] = useState(true);
 
   if (!project) {
     return (
@@ -98,7 +99,7 @@ function App() {
   return (
     <div className="dashboard-layout v2-fusion" style={{ 
       display: 'grid', 
-      gridTemplateColumns: `${isSidebarOpen ? '320px' : '64px'} 1fr minmax(350px, 1.2fr)`,
+      gridTemplateColumns: `${isSidebarOpen ? '320px' : '64px'} ${isBacklogOpen ? '0.5fr' : '0px'} minmax(500px, 1.5fr)`,
       height: '100vh',
       overflow: 'hidden',
       transition: 'grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -150,6 +151,7 @@ function App() {
             personas={project.personas}
             onAddPersona={handleAddPersona}
             onAddUS={handleAddUS}
+            onOpenBacklog={() => setIsBacklogOpen(true)}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', marginTop: '1rem', opacity: 0.4 }}>
@@ -162,8 +164,22 @@ function App() {
       </aside>
 
       {/* Column 2: User Stories Workshop */}
-      <main className="workspace unified-center" style={{ overflowY: 'auto', padding: '2rem', background: 'rgba(0,0,0,0.15)' }}>
-        <h3 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: 600 }}>Spécifications & Backlog</h3>
+      <main className="workspace unified-center" style={{ 
+        overflowY: 'auto', 
+        padding: isBacklogOpen ? '2rem' : '0', 
+        background: 'rgba(0,0,0,0.15)',
+        visibility: isBacklogOpen ? 'visible' : 'hidden',
+        transition: 'padding 0.3s'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Backlog</h3>
+          <button 
+            onClick={() => setIsBacklogOpen(false)}
+            style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1rem' }}
+          >
+            ✕
+          </button>
+        </div>
         
         <Suggestions sugs={suggestions} onAccept={(sug) => handleAddUS(sug as any)} onReject={(idx) => setSuggestions(prev => prev.filter((_, i) => i !== idx))} />
         
