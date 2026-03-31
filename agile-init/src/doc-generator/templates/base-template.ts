@@ -1,15 +1,13 @@
 import { ProjectContext } from '../domain/project-context';
 
 export const markdownHeader = (title: string, ctx: ProjectContext) => `
-# ${title} — ${ctx.projectName}
+TITRE : ${title.toUpperCase()}
+PROJET : ${ctx.projectName || "Sans nom"}
+DATE : ${new Date().toLocaleDateString('fr-FR')}
 
-*Généré par AgileInit Auto-Docs Factory*
-*Cadrage stratégique au ${new Date().toLocaleDateString()}*
-
----
 `;
 
 export const markdownFooter = () => `
----
-*Fin du document — Logiciel AgileInit Strategic Engine (V2).*
+
+Généré par AgileInit Auto-Docs Factory (V2) — Propulsion par Antigravity.
 `;

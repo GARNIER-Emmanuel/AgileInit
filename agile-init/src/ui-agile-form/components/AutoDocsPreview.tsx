@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 interface AutoDocsPreviewProps {
   docs: {
@@ -15,6 +17,7 @@ interface AutoDocsPreviewProps {
 export const AutoDocsPreview: React.FC<AutoDocsPreviewProps> = ({ docs }) => {
   const [activeFile, setActiveFile] = useState<keyof typeof docs>('productVision');
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const fileMappings: { key: keyof typeof docs; filename: string; short: string }[] = [
     { key: 'productVision', filename: 'PRODUCT_VISION.md', short: 'VISION' },
@@ -30,6 +33,25 @@ export const AutoDocsPreview: React.FC<AutoDocsPreviewProps> = ({ docs }) => {
     navigator.clipboard.writeText(docs[activeFile]);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadZip = async () => {
+    setDownloading(true);
+    try {
+      const zip = new JSZip();
+      const folder = zip.folder("docs");
+      
+      fileMappings.forEach(f => {
+        folder?.file(f.filename, docs[f.key]);
+      });
+
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, "agile-init-docs.zip");
+    } catch (err) {
+      console.error("Zip generation failed", err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -75,22 +97,41 @@ export const AutoDocsPreview: React.FC<AutoDocsPreviewProps> = ({ docs }) => {
           </button>
         ))}
 
-        <button
-          onClick={handleCopy}
-          style={{
-            marginLeft: 'auto',
-            padding: '0.4rem 0.8rem',
-            background: copied ? '#28a745' : 'rgba(255,255,255,0.05)',
-            border: '1px solid #333',
-            borderRadius: '4px',
-            color: 'white',
-            fontSize: '0.6rem',
-            cursor: 'pointer',
-            marginBottom: '0.4rem'
-          }}
-        >
-          {copied ? 'COPIÉ' : 'COPIER'}
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', marginBottom: '0.4rem' }}>
+          <button
+            onClick={handleDownloadZip}
+            disabled={downloading}
+            style={{
+              padding: '0.4rem 0.8rem',
+              background: downloading ? 'rgba(255,255,255,0.02)' : 'rgba(173,198,255,0.1)',
+              border: '1px solid #ADC6FF',
+              borderRadius: '4px',
+              color: '#ADC6FF',
+              fontSize: '0.6rem',
+              fontWeight: 700,
+              cursor: downloading ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            {downloading ? 'GÉNÉRATION...' : 'TÉLÉCHARGER (.ZIP)'}
+          </button>
+          <button
+            onClick={handleCopy}
+            style={{
+              padding: '0.4rem 0.8rem',
+              background: copied ? '#28a745' : 'rgba(255,255,255,0.05)',
+              border: '1px solid #333',
+              borderRadius: '4px',
+              color: 'white',
+              fontSize: '0.6rem',
+              cursor: 'pointer',
+            }}
+          >
+            {copied ? 'COPIÉ' : 'COPIER'}
+          </button>
+        </div>
       </nav>
 
       {/* RAW CONTENT AREA */}

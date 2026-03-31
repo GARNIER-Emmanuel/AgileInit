@@ -20,7 +20,13 @@ function App() {
     pitch: '',
     targetUsers: '',
     mainObjectives: [''],
-    technicalStack: { front: '', back: '', db: '' }
+    technicalStack: { 
+      front: '', 
+      back: '', 
+      db: '', 
+      architecturePatterns: ['Clean Architecture'],
+      customArchitecture: ''
+    }
   });
   const [suggestions, setSuggestions] = useState<Partial<UserStory>[]>([]);
   const [generatedDocs, setGeneratedDocs] = useState<any>(null);
