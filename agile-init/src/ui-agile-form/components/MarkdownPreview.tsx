@@ -15,21 +15,21 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ markdown }) =>
 
   return (
     <div className="preview-panel-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ 
-        marginBottom: '1.5rem', 
-        borderBottom: '1px solid #2A2A2A', 
-        paddingBottom: '1rem', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center' 
+      <header style={{
+        marginBottom: '1.5rem',
+        borderBottom: '1px solid #2A2A2A',
+        paddingBottom: '1rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
         <h3 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', opacity: 0.8 }}>BACKLOG LIVE</h3>
-        <button 
+        <button
           onClick={handleCopy}
           className="btn-secondary"
-          style={{ 
-            fontSize: '0.65rem', 
-            background: copied ? '#28a745' : 'rgba(255,255,255,0.05)', 
+          style={{
+            fontSize: '0.65rem',
+            background: copied ? '#28a745' : 'rgba(255,255,255,0.05)',
             border: '1px solid var(--outline-variant)',
             color: 'white',
             padding: '4px 10px',
@@ -40,16 +40,16 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ markdown }) =>
           {copied ? 'COPIÉ !' : 'COPIER TOUT (US4)'}
         </button>
       </header>
-      
-      <div style={{ 
+
+      <div style={{
         flex: 1,
-        color: '#E5E2E1', 
-        fontSize: '0.85rem', 
+        color: '#E5E2E1',
+        fontSize: '0.85rem',
         lineHeight: 1.6,
         fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"
       }}>
         {markdown.split('\n').map((line, i) => (
-          <div key={i} style={{ 
+          <div key={i} style={{
             color: line.startsWith('#') ? '#ADC6FF' : (line.startsWith('>') ? '#FFB595' : 'inherit'),
             marginBottom: '0.2rem'
           }}>

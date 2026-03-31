@@ -6,7 +6,7 @@ interface StrategicContextProps {
   onChange: (data: ProjectContext) => void;
   personas: any[];
   onAddPersona: (data: { name: string; role: string; description: string }) => void;
-  onAddUS: (data: { role: string; action: string; benefit: string; personaId: string }) => void;
+  onAddUS: (data: { role: string; action: string; benefit: string; personaId: string; priority: 'Must' | 'Should' | 'Could' | 'Wont' }) => void;
   onOpenBacklog: () => void;
 }
 
@@ -76,12 +76,14 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
     color: '#ADC6FF'
   };
 
-  const [newUS, setNewUS] = useState({ personaId: '', role: '', action: '', benefit: '' });
+  const [newUS, setNewUS] = useState<{ personaId: string; role: string; action: string; benefit: string; priority: 'Must' | 'Should' | 'Could' | 'Wont' }>({ 
+    personaId: '', role: '', action: '', benefit: '', priority: 'Must' 
+  });
   const handleUSSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUS.action || !newUS.personaId) return;
     onAddUS(newUS);
-    setNewUS({ ...newUS, action: '', benefit: '' }); // keep persona
+    setNewUS({ ...newUS, action: '', benefit: '' }); // keep persona and priority
   };
 
   return (
@@ -244,6 +246,23 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
                 ))}
               </select>
             </div>
+            
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>PRIORITÉ</label>
+                <select 
+                  value={newUS.priority}
+                  onChange={(e) => setNewUS({ ...newUS, priority: e.target.value as any })}
+                  style={{ ...inputStyle, background: 'rgba(255,255,255,0.1)', cursor: 'pointer' } as any}
+                >
+                  <option value="Must" style={{ background: '#1c1b1b', color: 'white' }}>Must (P0)</option>
+                  <option value="Should" style={{ background: '#1c1b1b', color: 'white' }}>Should (P1)</option>
+                  <option value="Could" style={{ background: '#1c1b1b', color: 'white' }}>Could (P2)</option>
+                  <option value="Wont" style={{ background: '#1c1b1b', color: 'white' }}>Won't (P3)</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>JE VEUX (ACTION)</label>
               <input 

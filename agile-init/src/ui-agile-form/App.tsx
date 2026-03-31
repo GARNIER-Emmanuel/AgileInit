@@ -79,7 +79,7 @@ function App() {
     setProject({ ...store.getProject()! });
   };
 
-  const handleAddUS = (data: { role: string; action: string; benefit: string; personaId: string }) => {
+  const handleAddUS = (data: { role: string; action: string; benefit: string; personaId: string; priority: 'Must' | 'Should' | 'Could' | 'Wont' }) => {
     if (!project) return;
     addUserStory(project.id, data);
     setProject({ ...store.getProject()! });
@@ -189,22 +189,15 @@ function App() {
       </main>
 
       {/* Column 3: Global Preview (Auto-Docs) */}
-      <aside className="preview-panel unified-right" style={{ borderLeft: '1px solid #2A2A2A', overflowY: 'auto', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h3 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', opacity: 0.6 }}>PREVIEW LIVRABLES</h3>
-          <div style={{ fontSize: '0.6rem', color: isGenerating ? '#ADC6FF' : '#888' }}>
-            <span style={{ color: isGenerating ? '#ADC6FF' : '#28a745' }}>●</span> {isGenerating ? 'GEN...' : 'AUTO-SYNC'}
-          </div>
-        </div>
-
-        {generatedDocs ? (
+      {generatedDocs ? (
+        <div style={{ borderLeft: '1px solid #2A2A2A', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <AutoDocsPreview docs={generatedDocs} />
-        ) : (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', opacity: 0.4, border: '1px dashed #2A2A2A', borderRadius: '8px' }}>
-            <p style={{ fontSize: '0.8rem' }}>Complétez le cadrage pour <br/><strong>VOIR LES RÉSULTATS</strong>.</p>
-          </div>
-        )}
-      </aside>
+        </div>
+      ) : (
+        <div style={{ borderLeft: '1px solid #2A2A2A', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.4, padding: '2rem' }}>
+          <p style={{ fontSize: '0.8rem' }}>Complétez le cadrage pour <br/><strong>VOIR LES RÉSULTATS</strong>.</p>
+        </div>
+      )}
 
     </div>
   );
