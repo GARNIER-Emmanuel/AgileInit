@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --surface: #131313;
+  --surface-low: #1C1B1B;
+  --surface-container: #201F1F;
+  --surface-lowest: #0e0e0e;
+  --surface-high: rgba(42, 42, 42, 0.7);
+  
+  --primary: #ADC6FF;
+  --primary-container: #4B8EFF;
+  --on-surface: #E5E2E1;
+  --outline-variant: rgba(139, 144, 160, 0.15);
+  
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+  background-color: var(--surface);
+  color: var(--on-surface);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 350px;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--surface-low);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Main Workspace */
+.workspace {
+  background-color: var(--surface);
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+
+/* Preview Panel */
+.preview-panel {
+  background-color: var(--surface-lowest);
+  padding: 2rem;
+  border-left: 1px solid var(--outline-variant);
+  overflow-y: auto;
+}
+
+/* Premium Card */
+.premium-card {
+  background-color: var(--surface-container);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: background 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.premium-card:hover {
+  background-color: rgba(53, 53, 52, 0.5);
+}
+
+/* Form Elements */
+.us-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+input, textarea, select {
+  background: var(--surface-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  color: #001a41;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* Glassmorphism */
+.glass {
+  background: var(--surface-high);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-container);
+  border-radius: 10px;
+}
