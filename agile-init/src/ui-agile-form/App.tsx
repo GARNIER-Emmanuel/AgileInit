@@ -1,43 +1,72 @@
 import { useState, useEffect } from 'react';
-import { ProjectForm } from './components/ProjectForm';
-import { PersonaForm } from './components/PersonaForm';
-import { UserStoryForm } from './components/UserStoryForm';
+import { StrategicContext } from './components/StrategicContext';
 import { UserStoryList } from './components/UserStoryList';
-import { MarkdownPreview } from './components/MarkdownPreview';
-import { Suggestions } from './components/Suggestions';
-import { AutoDocsForm } from './components/AutoDocsForm';
 import { AutoDocsPreview } from './components/AutoDocsPreview';
+import { Suggestions } from './components/Suggestions';
+import { ProjectForm } from './components/ProjectForm';
 
 // Use-cases & services
 import { createProject } from '../project-init/use-cases/createProject';
 import { addPersona } from '../project-init/use-cases/addPersona';
 import { addUserStory } from '../project-init/use-cases/addUserStory';
-import { generateDocs as generateBacklogDocs } from '../generate-docs/services/docGenerator';
 import { store } from '../shared/store';
 import { AgileProject, UserStory } from '../project-init/domain/entities';
 import { ProjectContext } from '../doc-generator/domain/project-context';
 
 function App() {
   const [project, setProject] = useState<AgileProject | null>(null);
-  const [markdown, setMarkdown] = useState('');
+  const [strategicCtx, setStrategicCtx] = useState<ProjectContext>({
+    projectName: '',
+    pitch: '',
+    targetUsers: '',
+    mainObjectives: [''],
+    technicalStack: { front: '', back: '', db: '' }
+  });
   const [suggestions, setSuggestions] = useState<Partial<UserStory>[]>([]);
-  const [viewMode, setViewMode] = useState<'workshop' | 'autodocs'>('workshop');
   const [generatedDocs, setGeneratedDocs] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Auto-generate docs when context or project changes (debounced)
+  useEffect(() => {
+    if (!project) return;
+    
+    const timeout = setTimeout(async () => {
+      setIsGenerating(true);
+      const res = await fetch('/api/docs/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...strategicCtx,
+          userStories: project.userStories,
+          personas: project.personas
+        })
+      });
+      if (res.ok) {
+        const docs = await res.json();
+        setGeneratedDocs(docs);
+      }
+      setIsGenerating(false);
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [strategicCtx, project?.userStories, project?.personas]);
 
   useEffect(() => {
-    if (project && viewMode === 'workshop') {
-      const docs = generateBacklogDocs(project);
-      setMarkdown(docs.full);
+    if (project) {
+      setStrategicCtx(prev => ({
+        ...prev,
+        projectName: project.name,
+        pitch: project.description
+      }));
       
       fetch('/api/suggestions')
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) setSuggestions(data);
-          else console.warn("Suggestions format error:", data);
         })
         .catch(err => console.error("Suggestions error:", err));
     }
-  }, [project, viewMode]);
+  }, [project]);
 
   const handleCreateProject = (data: { name: string; description: string }) => {
     const newProject = createProject(data);
@@ -47,44 +76,16 @@ function App() {
   const handleAddPersona = (data: { name: string; role: string; description: string }) => {
     if (!project) return;
     addPersona(project.id, data);
-    const updated = store.getProject();
-    if (updated) setProject({ ...updated });
+    setProject({ ...store.getProject()! });
   };
 
   const handleAddUS = (data: { role: string; action: string; benefit: string; personaId: string }) => {
     if (!project) return;
     addUserStory(project.id, data);
-    const updated = store.getProject();
-    if (updated) setProject({ ...updated });
+    setProject({ ...store.getProject()! });
   };
 
-  const handleAcceptSug = (sug: Partial<UserStory>) => {
-    handleAddUS(sug as any);
-    setSuggestions(prev => prev.filter(s => s.action !== sug.action));
-  };
-
-  const handleRejectSug = (idx: number) => {
-    setSuggestions(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleGenerateAutoDocs = async (ctx: ProjectContext) => {
-    const res = await fetch('/api/docs/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ctx)
-    });
-    if (res.ok) {
-      const docs = await res.json();
-      setGeneratedDocs(docs);
-    }
-  };
-
-  const downloadAll = async () => {
-    const response = await fetch('/api/export', { method: 'POST' });
-    if (response.ok) {
-      alert("Projet synchronisé avec le backend !");
-    }
-  };
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   if (!project) {
     return (
@@ -95,78 +96,100 @@ function App() {
   }
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <header>
-          <h2 style={{ fontSize: '1rem', color: '#ADC6FF' }}>AGILEINIT <span style={{ opacity: 0.5 }}>STRATEGIC</span></h2>
-          <p style={{ fontSize: '0.6rem', opacity: 0.5, marginTop: '0.2rem', letterSpacing: '0.1em' }}>VERSION EVOLUTION C</p>
+    <div className="dashboard-layout v2-fusion" style={{ 
+      display: 'grid', 
+      gridTemplateColumns: `${isSidebarOpen ? '320px' : '64px'} 1fr minmax(350px, 1.2fr)`,
+      height: '100vh',
+      overflow: 'hidden',
+      transition: 'grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+    }}>
+      
+      {/* Column 1: Strategic Context & Personas */}
+      <aside className="sidebar unified-left" style={{ 
+        borderRight: '1px solid #2A2A2A', 
+        overflowY: isSidebarOpen ? 'auto' : 'hidden', 
+        padding: isSidebarOpen ? '1rem' : '0.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'padding 0.3s'
+      }}>
+        <header style={{ 
+          marginBottom: isSidebarOpen ? '2rem' : '1rem', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: isSidebarOpen ? 'space-between' : 'center' 
+        }}>
+          {isSidebarOpen && (
+            <h2 style={{ fontSize: '0.9rem', color: '#ADC6FF', margin: 0 }}>AGILEINIT <span style={{ opacity: 0.5 }}>FUSION</span></h2>
+          )}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'white', 
+              cursor: 'pointer', 
+              padding: '8px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            {isSidebarOpen ? '✕' : '☰'}
+          </button>
         </header>
 
-        <nav style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button 
-            onClick={() => setViewMode('workshop')} 
-            style={{ 
-              background: viewMode === 'workshop' ? 'rgba(173, 198, 255, 0.1)' : 'transparent', 
-              border: viewMode === 'workshop' ? '1px solid var(--outline-variant)' : 'none',
-              color: viewMode === 'workshop' ? '#ADC6FF' : 'white',
-              padding: '0.8rem', borderRadius: '8px', textAlign: 'left', cursor: 'pointer', fontSize: '0.8rem' 
-            }}>
-            🛠 Workshop Cadrage
-          </button>
-          <button 
-            onClick={() => setViewMode('autodocs')} 
-            style={{ 
-              background: viewMode === 'autodocs' ? 'rgba(173, 198, 255, 0.1)' : 'transparent', 
-              border: viewMode === 'autodocs' ? '1px solid var(--outline-variant)' : 'none',
-              color: viewMode === 'autodocs' ? '#ADC6FF' : 'white',
-              padding: '0.8rem', borderRadius: '8px', textAlign: 'left', cursor: 'pointer', fontSize: '0.8rem' 
-            }}>
-            📑 Auto-Docs Factory
-          </button>
-        </nav>
-
-        {viewMode === 'workshop' && (
-          <div className="sidebar-persona-section" style={{ marginTop: '2rem' }}>
-            <h3 style={{ fontSize: '0.7rem', letterSpacing: '0.1em', opacity: 0.8, marginBottom: '1rem' }}>PERSONAS</h3>
-            <div className="persona-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
-              {project.personas.map(p => (
-                <span key={p.id} style={{ fontSize: '0.6rem', background: 'var(--surface-container)', padding: '0.3rem 0.5rem', borderRadius: '4px' }}>
-                  {p.name}
-                </span>
-              ))}
-            </div>
-            <PersonaForm onAdd={handleAddPersona} />
+        {isSidebarOpen ? (
+          <StrategicContext 
+            formData={strategicCtx} 
+            onChange={setStrategicCtx} 
+            personas={project.personas}
+            onAddPersona={handleAddPersona}
+            onAddUS={handleAddUS}
+          />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', marginTop: '1rem', opacity: 0.4 }}>
+            <div title="Projet">📁</div>
+            <div title="Stack">⚡</div>
+            <div title="Objectifs">🎯</div>
+            <div title="Personas">👥</div>
           </div>
         )}
-
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingTop: '2rem' }}>
-           <div style={{ padding: '0.8rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.75rem', opacity: 0.8, cursor: 'pointer' }} onClick={downloadAll}>🚀 Export API</div>
-        </div>
       </aside>
 
-      {/* Main Workspace */}
-      <main className="workspace" style={{ gridColumn: viewMode === 'autodocs' ? '2 / span 2' : '2' }}>
-        {viewMode === 'workshop' ? (
-          <>
-            <UserStoryForm personas={project.personas} onAdd={handleAddUS} />
-            <Suggestions sugs={suggestions} onAccept={handleAcceptSug} onReject={handleRejectSug} />
-            <UserStoryList stories={project.userStories} personas={project.personas} />
-          </>
-        ) : (
-          <div className="autodocs-container" style={{ padding: '1rem' }}>
-            <AutoDocsForm onGenerate={handleGenerateAutoDocs} />
-            {generatedDocs && <AutoDocsPreview docs={generatedDocs} />}
-          </div>
-        )}
+      {/* Column 2: User Stories Workshop */}
+      <main className="workspace unified-center" style={{ overflowY: 'auto', padding: '2rem', background: 'rgba(0,0,0,0.15)' }}>
+        <h3 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: 600 }}>Spécifications & Backlog</h3>
+        
+        <Suggestions sugs={suggestions} onAccept={(sug) => handleAddUS(sug as any)} onReject={(idx) => setSuggestions(prev => prev.filter((_, i) => i !== idx))} />
+        
+        <div style={{ marginTop: '1rem' }}>
+          <UserStoryList stories={project.userStories} personas={project.personas} />
+        </div>
       </main>
 
-      {/* Right Panel (only in workshop mode) */}
-      {viewMode === 'workshop' && (
-        <aside className="preview-panel">
-          <MarkdownPreview markdown={markdown} />
-        </aside>
-      )}
+      {/* Column 3: Global Preview (Auto-Docs) */}
+      <aside className="preview-panel unified-right" style={{ borderLeft: '1px solid #2A2A2A', overflowY: 'auto', padding: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', opacity: 0.6 }}>PREVIEW LIVRABLES</h3>
+          <div style={{ fontSize: '0.6rem', color: isGenerating ? '#ADC6FF' : '#888' }}>
+            <span style={{ color: isGenerating ? '#ADC6FF' : '#28a745' }}>●</span> {isGenerating ? 'GEN...' : 'AUTO-SYNC'}
+          </div>
+        </div>
+
+        {generatedDocs ? (
+          <AutoDocsPreview docs={generatedDocs} />
+        ) : (
+          <div style={{ padding: '4rem 2rem', textAlign: 'center', opacity: 0.4, border: '1px dashed #2A2A2A', borderRadius: '8px' }}>
+            <p style={{ fontSize: '0.8rem' }}>Complétez le cadrage pour <br/><strong>VOIR LES RÉSULTATS</strong>.</p>
+          </div>
+        )}
+      </aside>
+
     </div>
   );
 }

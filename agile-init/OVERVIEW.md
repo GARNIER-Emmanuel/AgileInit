@@ -27,17 +27,15 @@ Ce qui a été implémenté :
 2. **Exposition API (Prompt B)** :
    - Création du `docsRouter` et endpoints `/generate` et `/sample`.
    - Validation par tests unitaires (6/6 passés).
-4. **Mode Antigravity Helper (Prompt D)** :
-   - Onglet spécialisé "⚡ ANTIGRAVITY" pour les développeurs.
-   - Vue divisée : Plan de génération vs Liste d'actions séquentielles (Segmented Prompts).
-5. **Revue & Refactor (Prompt E)** :
-   - Factorisation de la logique de génération Markdown (`base-template.ts`).
-   - Standardisation des 7 templates de documentation.
-   - Mise à jour du `README.md` racine (V2 Identity).
-   - Validation de la cohérence globale et de l'architecture modulaire.
+5. **Fusion Expérience Unifiée (FUSION)** :
+   - Suppression du sélecteur de mode (Workshop vs Auto-Docs).
+   - Dashboard 3 colonnes : Stratégie (Gauche), Backlog Engine (Milieu), Livrables Pack (Droite).
+   - Alignement du flux : plus de séparation entre US et Contexte Global.
+   - Optimisation de la vue Antigravity Helper pour le panneau latéral.
+   - Suppression des composants obsolètes.
 
 ## Conclusion :
-AgileInit est passé d'un assistant de backlog à un véritable **moteur stratégique** pour le setup de projet. L'application est prête à être utilisée pour générer de nouveaux projets de A à Z.
+AgileInit est désormais un cockpit de pilotage projet complet. L'utilisateur saisit sa vision, définit ses US, et voit son pack de documentation s'assembler en temps réel sur la droite.
 
 ---
 *Généré par Antigravity — 2026*
