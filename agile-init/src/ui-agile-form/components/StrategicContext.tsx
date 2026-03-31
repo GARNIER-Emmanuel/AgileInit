@@ -7,13 +7,18 @@ interface StrategicContextProps {
   personas: any[];
   onAddPersona: (data: { name: string; role: string; description: string }) => void;
   onAddUS: (data: { role: string; action: string; benefit: string; personaId: string }) => void;
+  onOpenBacklog: () => void;
 }
 
-export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, onChange, personas, onAddPersona, onAddUS }) => {
+export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, onChange, personas, onAddPersona, onAddUS, onOpenBacklog }) => {
   const [expanded, setExpanded] = useState<string | null>('projet');
 
   const toggle = (section: string) => {
-    setExpanded(expanded === section ? null : section);
+    const nextState = expanded === section ? null : section;
+    setExpanded(nextState);
+    if (section === 'us' && nextState === 'us') {
+      onOpenBacklog();
+    }
   };
 
   const handleChange = (field: string, value: any) => {
