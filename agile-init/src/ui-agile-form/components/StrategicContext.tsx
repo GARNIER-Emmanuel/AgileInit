@@ -6,7 +6,7 @@ interface StrategicContextProps {
   onChange: (data: ProjectContext) => void;
   personas: any[];
   onAddPersona: (data: { name: string; role: string; description: string }) => void;
-  onAddUS: (data: { role: string; action: string; benefit: string; personaId: string }) => void;
+  onAddUS: (data: { role: string; action: string; benefit: string; personaId: string; priority: 'Must' | 'Should' | 'Could' | 'Wont' }) => void;
   onOpenBacklog: () => void;
 }
 
@@ -25,7 +25,7 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
     onChange({ ...formData, [field]: value });
   };
 
-  const handleStackChange = (field: string, value: string) => {
+  const handleStackChange = (field: string, value: any) => {
     onChange({ 
       ...formData, 
       technicalStack: { ...formData.technicalStack, [field]: value } 
@@ -76,12 +76,14 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
     color: '#ADC6FF'
   };
 
-  const [newUS, setNewUS] = useState({ personaId: '', role: '', action: '', benefit: '' });
+  const [newUS, setNewUS] = useState<{ personaId: string; role: string; action: string; benefit: string; priority: 'Must' | 'Should' | 'Could' | 'Wont' }>({ 
+    personaId: '', role: '', action: '', benefit: '', priority: 'Must' 
+  });
   const handleUSSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUS.action || !newUS.personaId) return;
     onAddUS(newUS);
-    setNewUS({ ...newUS, action: '', benefit: '' }); // keep persona
+    setNewUS({ ...newUS, action: '', benefit: '' }); // keep persona and priority
   };
 
   return (
@@ -148,6 +150,59 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
             <div>
               <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>DATABASE</label>
               <input type="text" placeholder="Ex: PostgreSQL, Redis" value={formData.technicalStack.db} onChange={(e) => handleStackChange('db', e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem' }}>
+              {formData.technicalStack.architecturePatterns.map(archi => (
+                <span key={archi} style={{ 
+                  fontSize: '0.65rem', 
+                  padding: '0.3rem 0.6rem', 
+                  background: 'rgba(255,181,149,0.1)', 
+                  color: '#FFB595', 
+                  border: '1px solid rgba(255,181,149,0.2)',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  {archi}
+                  <button 
+                    onClick={() => {
+                      const updated = formData.technicalStack.architecturePatterns.filter(a => a !== archi);
+                      handleStackChange('architecturePatterns', updated);
+                    }}
+                    style={{ background: 'transparent', border: 'none', color: '#FFB595', cursor: 'pointer', fontSize: '0.8rem', padding: 0 }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.3rem' }}>
+              <select 
+                id="archi-select"
+                style={{ ...inputStyle, background: 'rgba(255,255,255,0.1)', cursor: 'pointer', flex: 1 } as any}
+                defaultValue=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (!val || formData.technicalStack.architecturePatterns.includes(val)) return;
+                  if (val === 'Autre') {
+                     const custom = prompt("Spécifiez l'architecture :");
+                     if (custom) handleStackChange('architecturePatterns', [...formData.technicalStack.architecturePatterns, custom]);
+                  } else {
+                     handleStackChange('architecturePatterns', [...formData.technicalStack.architecturePatterns, val]);
+                  }
+                  e.target.value = "";
+                }}
+              >
+                <option value="" disabled style={{ background: '#1c1b1b' }}>+ AJOUTER UNE ARCHI</option>
+                <option value="Clean Architecture" style={{ background: '#1c1b1b' }}>Clean Architecture</option>
+                <option value="Vertical Slice" style={{ background: '#1c1b1b' }}>Vertical Slice (VSA)</option>
+                <option value="Screaming Architecture" style={{ background: '#1c1b1b' }}>Screaming Architecture</option>
+                <option value="Hexagonal" style={{ background: '#1c1b1b' }}>Hexagonal</option>
+                <option value="MCD" style={{ background: '#1c1b1b' }}>MCD</option>
+                <option value="Autre" style={{ background: '#1c1b1b' }}>Définir Autre...</option>
+              </select>
             </div>
           </div>
         )}
@@ -244,6 +299,23 @@ export const StrategicContext: React.FC<StrategicContextProps> = ({ formData, on
                 ))}
               </select>
             </div>
+            
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>PRIORITÉ</label>
+                <select 
+                  value={newUS.priority}
+                  onChange={(e) => setNewUS({ ...newUS, priority: e.target.value as any })}
+                  style={{ ...inputStyle, background: 'rgba(255,255,255,0.1)', cursor: 'pointer' } as any}
+                >
+                  <option value="Must" style={{ background: '#1c1b1b', color: 'white' }}>Vital (Must)</option>
+                  <option value="Should" style={{ background: '#1c1b1b', color: 'white' }}>Essentiel (Should)</option>
+                  <option value="Could" style={{ background: '#1c1b1b', color: 'white' }}>Optionnel (Could)</option>
+                  <option value="Wont" style={{ background: '#1c1b1b', color: 'white' }}>Exclu (Won't)</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label style={{ fontSize: '0.65rem', opacity: 0.6 }}>JE VEUX (ACTION)</label>
               <input 

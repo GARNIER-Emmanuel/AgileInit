@@ -34,8 +34,21 @@ Ce qui a été implémenté :
    - Optimisation de la vue Antigravity Helper pour le panneau latéral.
    - Suppression des composants obsolètes.
 
+# Évolution — Métadonnées Agile (MoSCoW & Statuts)
+Ce qui a été implémenté :
+1. **Typage des Métadonnées** : Enrichissement de l'entité `UserStory` avec les champs `priority` (Must, Should, Could, Wont) et `status` (Draft, Ready, In Progress, Done).
+2. **Saisie Priorisation** : Intégration d'un sélecteur de priorité MoSCoW directement dans le formulaire de création de User Story en sidebar.
+3. **Backlog Dynamique** : Mise à jour du template `BACKLOG.md` pour afficher en temps réel la priorité et le statut de chaque US dans le tableau récapitulatif.
+4. **Validation Typée** : Mise à jour des use-cases `addUserStory` et des contrôleurs React pour garantir l'intégrité des données agiles.
+
+# Évolution — Exportation (ZIP Automatisé)
+Ce qui a été implémenté :
+1. **Génération client-side** : Utilisation de `JSZip` et `FileSaver` pour empaqueter les 7 livrables directement dans le navigateur.
+2. **Organisation structurelle** : Les fichiers sont automatiquement rangés dans un dossier nommé `docs/` à l'intérieur de l'archive.
+3. **Interface de contrôle** : Ajout d'un bouton "TÉLÉCHARGER (.ZIP)" avec gestion d'état (Génération en cours) pour une expérience utilisateur fluide.
+
 ## Conclusion :
-AgileInit est désormais un cockpit de pilotage projet complet. L'utilisateur saisit sa vision, définit ses US, et voit son pack de documentation s'assembler en temps réel sur la droite.
+AgileInit est désormais un cockpit de pilotage projet complet, permettant non seulement de visualiser mais aussi d'exporter instantanément tout le travail de cadrage technique.
 
 ---
 *Généré par Antigravity — 2026*

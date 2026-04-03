@@ -11,6 +11,7 @@ export interface UserStory {
   action: string;
   benefit: string;
   personaId: string;
+  priority: 'Must' | 'Should' | 'Could' | 'Wont';
   status: 'Draft' | 'Ready' | 'In Progress' | 'Done';
 }
 

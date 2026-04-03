@@ -7,6 +7,8 @@ export interface ProjectContext {
     front: string;
     back: string;
     db: string;
+    architecturePatterns: string[];
+    customArchitecture?: string;
   };
   constraints?: string[];
   userStories?: any[];
