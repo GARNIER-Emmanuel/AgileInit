@@ -52,9 +52,27 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ markdown }) =>
         lineHeight: 1.7,
         padding: '0.5rem 0'
       }}>
-        <div data-testid="fake-render">
+        <ReactMarkdown 
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({children}) => <div style={{color: '#ADC6FF', fontSize: '1.2rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.5rem'}}>{children}</div>,
+            h2: ({children}) => <div style={{color: '#ADC6FF', fontSize: '1.1rem', fontWeight: 700, marginTop: '1.2rem', marginBottom: '0.4rem'}}>{children}</div>,
+            p: ({children}) => <div style={{marginBottom: '1rem'}}>{children}</div>,
+            strong: ({children}) => <span style={{fontWeight: 700}}>{children}</span>,
+            blockquote: ({children}) => (
+              <div style={{
+                borderLeft: '3px solid rgba(255,255,255,0.1)',
+                paddingLeft: '1rem',
+                margin: '1rem 0',
+                opacity: 0.8
+              }}>{children}</div>
+            ),
+            ul: ({children}) => <div style={{paddingLeft: '0.5rem', marginBottom: '1rem'}}>{children}</div>,
+            li: ({children}) => <div style={{marginBottom: '0.3rem'}}>{children}</div>,
+          }}
+        >
           {markdown}
-        </div>
+        </ReactMarkdown>
       </div>
     </div>
   );
