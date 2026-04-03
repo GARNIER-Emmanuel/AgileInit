@@ -1,13 +1,21 @@
-# USER STORIES - {{projectName}}
-
-{{#each userStories}}
-## US{{@index}}: {{role}}
-**En tant que** {{role}}
-**Je veux** {{action}}
-**Afin de** {{benefit}}
-
-*Statut : {{status}}*
-*Persona : {{getPersonaName personaId}}*
+# User Stories — {{projectName}}
+> **Projet :** {{projectName}}  
+> **Cadrage Stratégique :** {{date}}
 
 ---
+
+Cette section détaille les fonctionnalités attendues du point de vue de l'utilisateur final.
+
+{{#each userStories}}
+### US{{@index}} : {{action}}
+**En tant que** {{role}}, **je veux** {{action}} **afin de** {{benefit}}.
+
+*   **Priorité** : {{priority}}
+*   **Statut** : {{status}}
+
+---
+
 {{/each}}
+
+---
+*Généré par AgileInit Auto-Docs Factory (V2) — Propulsion par Antigravity.*

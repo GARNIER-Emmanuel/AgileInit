@@ -24,7 +24,8 @@ docsRouter.get('/sample', (_, res) => {
     technicalStack: {
       front: 'React + Vite',
       back: 'Node.js + Express',
-      db: 'MemoryStore'
+      db: 'MemoryStore',
+      architecturePatterns: ['Clean Architecture']
     }
   };
   res.json(sample);
